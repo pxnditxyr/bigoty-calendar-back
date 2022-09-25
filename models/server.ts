@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 
 import { authRouter } from '../routes';
+import { dbConnection } from '../database';
 
 export class Server {
 
@@ -15,8 +16,8 @@ export class Server {
     this.app = express();
     this.port = process.env.PORT || '4000';
 
+    this.connectToDatabase();
     this.middlewares();
-
     this.routes();
   }
 
@@ -28,6 +29,10 @@ export class Server {
 
   routes () {
     this.app.use( this.apiPaths.auth, authRouter );
+  }
+
+  async connectToDatabase () {
+    await dbConnection();
   }
 
   listen () {
