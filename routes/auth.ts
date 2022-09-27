@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 
 import { renewToken, signInUser, signUpUser } from '../controllers';
-import { fieldValidators } from '../middlewares/fieldValidators';
+import { fieldValidators, jwtValidator } from '../middlewares';
 
 const router = Router();
 
@@ -23,6 +23,6 @@ router.post( '/signin', [
   fieldValidators
 ], signInUser );
 
-router.get( '/renew-token', renewToken );
+router.get( '/renew-token', jwtValidator, renewToken );
 
 export { router as authRouter };

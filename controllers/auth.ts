@@ -4,7 +4,8 @@ import bcrypt from 'bcryptjs';
 import People from '../models/user/People';
 import User from '../models/user/User';
 
-import { getUserByEmail, getUserByUsername } from './user';
+import { generateJWT } from '../helpers'
+import { getUserByEmail, getUserByEmailOrUsername, getUserByUsername } from './user';
 
 export const signUpUser = async ( req : Request, res : Response ) => {
 
@@ -35,6 +36,8 @@ export const signUpUser = async ( req : Request, res : Response ) => {
     await people.save();
     await user.save();
 
+    const token = await generateJWT( user._id.toString(), people.lastName, people.name, user.email, user.username );
+
     return res.status( 201 ).json({
       ok: true,
       msg: 'created user',
@@ -43,6 +46,7 @@ export const signUpUser = async ( req : Request, res : Response ) => {
       name: people.name,
       username: user.username,
       email: user.email,
+      token,
     });
   } catch ( error : any ) {
     return res.status( 500 ).json({
@@ -58,28 +62,79 @@ export const signInUser = async ( req : Request, res : Response ) => {
 
   try {
 
-    const { user, password } = req.body;
+    const { user: userData, password } = req.body;
+
+    const user = await getUserByEmailOrUsername( userData );
+    if ( !user ) {
+      return res.status( 400 ).json({
+        ok: false,
+        msg: 'User or password incorrect'
+      });
+    }
+
+    const validPassword = bcrypt.compareSync( password, user.password );
+
+    if ( !validPassword ) {
+      return res.status( 400 ).json({
+        ok: false,
+        msg: 'User or password incorrect'
+      });
+    }
+
+    const people = await People.findById( user.peopleUid );
+
+    if ( !people ) {
+      return res.status( 500 ).json({
+        ok: false,
+        msg: 'Please contact the administrator'
+      });
+    }
+
+    const token = await generateJWT( user._id.toString(), people.lastName, people.name, user.email, user.username );
 
     return res.json({ 
       ok: true,
       msg: 'sign in user',
-      body: req.body,
+      uid: user._id,
+      lastName: people.lastName,
+      name: people.name,
+      username: user.username,
+      email: user.email,
+      token,
     });
+
   } catch ( error : any ) {
     return res.status( 500 ).json({
       ok: false,
       msg: 'Please contact the administrator',
-      error,
     });
   }
 
 };
 
 export const renewToken = async ( req : Request, res : Response ) => {
-  return res.json({ 
-    ok: true,
-    msg: 'renew token'
-  });
+
+  try {
+
+    const { uid, lastName, name, email, username } = req;
+    const token = await generateJWT( uid, lastName, name, email, username );
+
+    return res.json({ 
+      ok: true,
+      msg: 'renew token',
+      uid,
+      lastName,
+      name,
+      username,
+      email,
+      token,
+    });
+  } catch ( error : any ) {
+    return res.status( 500 ).json({
+      ok: false,
+      msg: 'Please contact the administrator',
+    });
+  }
 }
 
 

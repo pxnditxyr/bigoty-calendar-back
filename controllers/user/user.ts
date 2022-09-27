@@ -14,3 +14,8 @@ export const getUserByUsername = async ( username : string )  => {
   const user = await User.findOne({ username });
   return user;
 };
+
+export const getUserByEmailOrUsername = async ( userData : string )  => {
+  const user = await User.findOne({ $or: [{ email: userData }, { username: userData }] });
+  return user;
+}
