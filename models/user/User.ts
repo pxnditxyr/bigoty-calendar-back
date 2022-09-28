@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { model, ObjectId, Schema } from 'mongoose';
 
 interface IUser {
   username: string;
@@ -7,7 +7,7 @@ interface IUser {
   avatar: string;
   role: string;
   google: boolean;
-  peopleUid: string;
+  people: ObjectId;
   status: boolean;
 };
 
@@ -39,9 +39,10 @@ const UserSchema = new Schema<IUser>({
     type: Boolean,
     default: false,
   },
-  peopleUid: {
-    type: String,
-    required: true,
+  people: {
+    type: Schema.Types.ObjectId,
+    ref: 'people',
+    required: true
   },
   status: {
     type: Boolean,

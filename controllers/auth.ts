@@ -25,25 +25,25 @@ export const signUpUser = async ( req : Request, res : Response ) => {
       });
     }
 
-    const people = new People({ lastName, name, birthday });
-    const peopleUid = people._id;
+    const peopleData = new People({ lastName, name, birthday });
+    const people = peopleData._id;
 
-    const user = new User({ username, email, password, role, peopleUid });
+    const user = new User({ username, email, password, role, people });
     const salt = bcrypt.genSaltSync();
 
     user.password = bcrypt.hashSync( password, salt );
 
-    await people.save();
+    await peopleData.save();
     await user.save();
 
-    const token = await generateJWT( user._id.toString(), people.lastName, people.name, user.email, user.username );
+    const token = await generateJWT( user._id.toString(), peopleData.lastName, peopleData.name, user.email, user.username );
 
     return res.status( 201 ).json({
       ok: true,
       msg: 'created user',
       uid: user._id,
-      lastName: people.lastName,
-      name: people.name,
+      lastName: peopleData.lastName,
+      name: peopleData.name,
       username: user.username,
       email: user.email,
       token,
@@ -81,7 +81,7 @@ export const signInUser = async ( req : Request, res : Response ) => {
       });
     }
 
-    const people = await People.findById( user.peopleUid );
+    const people = await People.findById( user.people );
 
     if ( !people ) {
       return res.status( 500 ).json({

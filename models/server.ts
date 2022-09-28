@@ -1,7 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 
-import { authRouter } from '../routes';
+import { authRouter, eventsRouter } from '../routes';
 import { dbConnection } from '../database';
 
 export class Server {
@@ -10,6 +10,7 @@ export class Server {
   private port : string;
   private apiPaths = {
     auth: '/api/auth',
+    events: '/api/events',
   }
 
   constructor () {
@@ -29,6 +30,7 @@ export class Server {
 
   routes () {
     this.app.use( this.apiPaths.auth, authRouter );
+    this.app.use( this.apiPaths.events, eventsRouter );
   }
 
   async connectToDatabase () {
@@ -37,7 +39,7 @@ export class Server {
 
   listen () {
     this.app.listen( this.port, () => {
-      console.log( `Server running on port ${ this.port }!!` );
+      console.log( `Server running on port ${ this.port }` );
       console.log( `http://localhost:${ this.port }` );
     });
   }
