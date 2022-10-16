@@ -5,17 +5,16 @@ import People from '../models/user/People';
 import User from '../models/user/User';
 
 import { generateJWT } from '../helpers'
-import { getUserByEmail, getUserByEmailOrUsername, getUserByUsername } from './user';
 
 export const signUpUser = async ( req : Request, res : Response ) => {
 
+  const { lastName, name, birthday, username, email, password } = req.body;
+
   try {
-    const { lastName, name, birthday, username, email, password, role } = req.body;
+    const existUserWithEmail = await User.findOne({ email, status: true });
+    const existUserWithUsername = await User.findOne({ username, status: true });
 
-    const existUserWithEmail = await getUserByEmail( email );
-    const existUserWithUsername = await getUserByUsername( username );
-
-    if ( Boolean( existUserWithEmail || Boolean( existUserWithUsername ) ) ) {
+    if ( Boolean( existUserWithEmail ) || Boolean( existUserWithUsername ) ) {
       return res.status( 400 ).json({
         ok: false,
         msg: {
@@ -28,7 +27,7 @@ export const signUpUser = async ( req : Request, res : Response ) => {
     const peopleData = new People({ lastName, name, birthday });
     const people = peopleData._id;
 
-    const user = new User({ username, email, password, role, people });
+    const user = new User({ username, email, password, people });
     const salt = bcrypt.genSaltSync();
 
     user.password = bcrypt.hashSync( password, salt );
@@ -49,10 +48,10 @@ export const signUpUser = async ( req : Request, res : Response ) => {
       token,
     });
   } catch ( error : any ) {
+    console.log( error );
     return res.status( 500 ).json({
       ok: false,
       msg: 'Please contact the administrator',
-      error,
     });
   }
 
@@ -64,11 +63,22 @@ export const signInUser = async ( req : Request, res : Response ) => {
 
     const { user: userData, password } = req.body;
 
-    const user = await getUserByEmailOrUsername( userData );
+    const user = await User.findOne({
+      $or: [
+        { email: userData },
+        { username: userData }
+      ]
+    });
     if ( !user ) {
       return res.status( 400 ).json({
         ok: false,
         msg: 'User or password incorrect'
+      });
+    }
+    if ( user.status === false ) {
+      return res.status( 400 ).json({
+        ok: false,
+        msg: 'This user does not exist'
       });
     }
 

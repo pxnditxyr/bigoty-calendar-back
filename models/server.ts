@@ -1,7 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 
-import { authRouter, eventsRouter } from '../routes';
+import { authRouter, departamentRouter, eventsRouter, lookupRouter, organizationRouter, pageRouter, profileRouter } from '../routes';
 import { dbConnection } from '../database';
 
 export class Server {
@@ -11,6 +11,11 @@ export class Server {
   private apiPaths = {
     auth: '/api/auth',
     events: '/api/events',
+    page: '/api/page',
+    profile: '/api/profile',
+    lookup: '/api/lookup',
+    organization: '/api/organization',
+    departament: '/api/departament',
   }
 
   constructor () {
@@ -31,6 +36,11 @@ export class Server {
   routes () {
     this.app.use( this.apiPaths.auth, authRouter );
     this.app.use( this.apiPaths.events, eventsRouter );
+    this.app.use( this.apiPaths.page, pageRouter );
+    this.app.use( this.apiPaths.profile, profileRouter );
+    this.app.use( this.apiPaths.lookup, lookupRouter );
+    this.app.use( this.apiPaths.organization, organizationRouter );
+    this.app.use( this.apiPaths.departament, departamentRouter );
   }
 
   async connectToDatabase () {

@@ -1,9 +1,11 @@
-import { model, Schema } from 'mongoose';
+import { model, Schema, Types } from 'mongoose';
 
 interface IPeople {
   lastName: string;
   name: string;
   birthday: Date;
+  gender: Types.ObjectId;
+  departament: Types.ObjectId;
   status: boolean;
 };
 
@@ -19,6 +21,14 @@ const PeopleSchema = new Schema<IPeople>({
   birthday: {
     type: Date,
     required: true,
+  },
+  gender: {
+    type: Schema.Types.ObjectId,
+    ref: 'subdomain',
+  },
+  departament: {
+    type: Schema.Types.ObjectId,
+    ref: 'departament',
   },
   status: {
     type: Boolean,

@@ -1,4 +1,4 @@
-import { model, ObjectId, Schema } from 'mongoose';
+import { model, Types, Schema } from 'mongoose';
 
 interface IUser {
   username: string;
@@ -7,7 +7,8 @@ interface IUser {
   avatar: string;
   role: string;
   google: boolean;
-  people: ObjectId;
+  people: Types.ObjectId;
+  departament: Types.ObjectId;
   status: boolean;
 };
 
@@ -31,9 +32,8 @@ const UserSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    required: true,
     default: 'USER_ROLE',
-    enum: [ 'ADMIN_ROLE', 'TEACHER_ROLE', 'STUDENT_ROLE', 'BOSS_ROLE', 'EMPLOYEE_ROLE', 'USER_ROLE' ],
+    enum: [ 'SUPER_USER','ADMIN_ROLE', 'TEACHER_ROLE', 'STUDENT_ROLE', 'BOSS_ROLE', 'EMPLOYEE_ROLE', 'USER_ROLE' ],
   },
   google: {
     type: Boolean,
@@ -44,9 +44,12 @@ const UserSchema = new Schema<IUser>({
     ref: 'people',
     required: true
   },
+  departament: {
+    type: Schema.Types.ObjectId,
+    ref: 'departament',
+  },
   status: {
     type: Boolean,
-    required: true,
     default: true,
   },
 });

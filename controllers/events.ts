@@ -2,34 +2,45 @@ import { Request, Response } from 'express';
 import { stringToObjectId } from '../helpers';
 
 import Event from '../models/event/Event';
+import People from '../models/user/People';
+import User from '../models/user/User';
 
 export const getEvents = async ( req : Request, res : Response ) => {
-  const events = await Event.find({ user: stringToObjectId( req.uid ) })
-    .populate({
-      path: 'user',
-      select: 'email username avatar role',
-      populate: {
-        path: 'people',
-        select: 'lastName name birthday',
-      }
-    });
+  const events = await Event.find({ user: stringToObjectId( req.uid ), status: true })
 
-  const enabledEvents = events.filter( event => event.status );
+  const eventsWithNameAndId = events.map( async ( event ) => {
+    const user = await User.findById( event.user );
+    if ( !user ) return;
+    const people = await People.findById( user.people );
+    if ( !people ) return;
+    return {
+      _id: event._id,
+      title: event.title,
+      start: event.start,
+      end: event.end,
+      note: event.note,
+      bgColor: event.bgColor,
+      user: {
+        _id: user._id,
+        name: people.name + ' ' + people.lastName
+      }
+    }
+  });
 
   res.json({
     ok: true,
-    events: enabledEvents
+    events: await Promise.all( eventsWithNameAndId ),
   });
 };
 
-export const createNewEvent = ( req : Request, res : Response ) => {
+export const createNewEvent = async ( req : Request, res : Response ) => {
   const { title, note, start, end, bgColor } = req.body;
 
   const event = new Event({ title, note, start, end, bgColor });
 
   try {
     event.user = stringToObjectId( req.uid );
-    event.save();
+    await event.save();
 
     res.json({
       ok: true,
@@ -90,10 +101,8 @@ export const updateEvent = async ( req : Request, res : Response ) => {
 
 export const deleteEvent = async ( req : Request, res : Response ) => {
 
+  const { id } = req.params;
   try {
-
-    const { id } = req.params;
-
     const event = await Event.findById( id );
     if ( !event ) {
       return res.status( 404 ).json({

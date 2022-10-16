@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 
 import { renewToken, signInUser, signUpUser } from '../controllers';
+import { isDate } from '../helpers';
 import { fieldValidators, jwtValidator } from '../middlewares';
 
 const router = Router();
@@ -11,11 +12,10 @@ router.post(
   [
     check( 'lastName', 'Last name is required' ).not().isEmpty(),
     check( 'name', 'Name is required' ).not().isEmpty(),
-    check( 'birthday', 'Birthday is required' ).not().isEmpty(),
+    check( 'birthday', 'Birthday is required' ).custom( isDate ),
     check( 'username', 'Username is required' ).not().isEmpty(),
     check( 'email', 'Email is required' ).isEmail(),
     check( 'password', 'Password is required' ).isLength({ min: 6 }),
-    check( 'confirmPassword', 'Confirm password is required' ).isLength({ min: 6 }),
     fieldValidators 
   ],
   signUpUser
