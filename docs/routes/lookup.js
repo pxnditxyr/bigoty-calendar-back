@@ -1,0 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.lookupRouter = void 0;
+const express_1 = require("express");
+const controllers_1 = require("../controllers");
+const middlewares_1 = require("../middlewares");
+const router = (0, express_1.Router)();
+exports.lookupRouter = router;
+router.use(middlewares_1.jwtValidator);
+router.use(middlewares_1.isSuperUser);
+router.get('/get-all', controllers_1.getAllDomains);
+router.post('/new-full-domain', controllers_1.createFullDomain);
+router.get('/domain/:domainName', controllers_1.getDomain);
+router.post('/domain/new-domain', controllers_1.createDomain);
+router.put('/domain/update-domain/:domainName', controllers_1.updateDomain);
+router.delete('/domain/delete-domain/:domainName', controllers_1.deleteDomain);
+router.get('/subdomain/:subdomainName', controllers_1.getSubdomain);
+router.post('/subdomain/new-subdomain/:domainName', controllers_1.createSubdomain);
+router.put('/subdomain/update-subdomain/:subdomainName', controllers_1.updateSubdomain);
+router.delete('/subdomain/delete-subdomain/:subdomainName', controllers_1.deleteSubdomain);
+//# sourceMappingURL=lookup.js.map
