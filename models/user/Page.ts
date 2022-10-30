@@ -61,7 +61,7 @@ const PageSchema = new Schema<IPage>({
 });
 
 PageSchema.method( 'toJSON', function () {
-  const { __v, status, user, profession, ...object } = this.toObject();
+  const { __v, status, user, ...object } = this.toObject();
   return object;
 });
 

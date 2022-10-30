@@ -20,14 +20,14 @@ router.post(
 );
 
 router.put(
-  '/update/:id',
+  '/update',
   [
     check( 'title', 'Title is required' ).not().isEmpty(),
     fieldValidators
   ],
   updatePage
 );
-router.delete( '/delete/:id', deletePage );
+router.delete( '/delete', deletePage );
 
 export { router as pageRouter };
 

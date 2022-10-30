@@ -45,6 +45,7 @@ export const signUpUser = async ( req : Request, res : Response ) => {
       name: peopleData.name,
       username: user.username,
       email: user.email,
+      birthday: peopleData.birthday,
       token,
     });
   } catch ( error : any ) {
@@ -110,6 +111,7 @@ export const signInUser = async ( req : Request, res : Response ) => {
       name: people.name,
       username: user.username,
       email: user.email,
+      birthday: people.birthday,
       token,
     });
 
@@ -125,18 +127,25 @@ export const signInUser = async ( req : Request, res : Response ) => {
 export const renewToken = async ( req : Request, res : Response ) => {
 
   try {
-
-    const { uid, lastName, name, email, username } = req;
-    const token = await generateJWT( uid, lastName, name, email, username );
-
+    const { uid } = req;
+    const user = await User.findById( uid );
+    const people = await People.findById( user?.people );
+    if ( !user || !people ) {
+      return res.status( 404 ).json({
+        ok: false,
+        msg: 'User not found'
+      });
+    }
+    const token = await generateJWT( uid, people.lastName, people.name, user.email, user.username );
     return res.json({ 
       ok: true,
       msg: 'renew token',
       uid,
-      lastName,
-      name,
-      username,
-      email,
+      lastName: people.lastName,
+      name: people.name,
+      username: user.username,
+      email: user.email,
+      birthday: people.birthday,
       token,
     });
   } catch ( error : any ) {

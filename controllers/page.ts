@@ -49,9 +49,8 @@ export const createNewPage = async ( req : Request, res : Response ) => {
 };
 
 export const updatePage = async ( req : Request, res : Response ) => {
-  const { id } = req.params;
   try {
-    const page = await Page.findById( id );
+    const page = await Page.findOne({ user: req.uid, status: true });
 
     if ( !page ) {
       return res.status( 404 ).json({
@@ -71,7 +70,7 @@ export const updatePage = async ( req : Request, res : Response ) => {
       user: req.uid
     };
 
-    const updatedPage = await Page.findByIdAndUpdate( id, newPage, { new: true } );
+    const updatedPage = await Page.findByIdAndUpdate( page._id, newPage, { new: true } );
     return res.json({
       ok: true,
       msg: 'Updated page',
@@ -87,9 +86,8 @@ export const updatePage = async ( req : Request, res : Response ) => {
 };
 
 export const deletePage = async ( req : Request, res : Response ) => {
-  const { id } = req.params;
   try {
-    const page = await Page.findById( id );
+    const page = await Page.findOne({ user: req.uid, status: true });
     if ( !page ) {
       return res.status( 404 ).json({
         ok: false,
@@ -105,7 +103,7 @@ export const deletePage = async ( req : Request, res : Response ) => {
     }
 
     page.status = false;
-    await Page.findByIdAndUpdate( id, page, { new: true } );
+    await Page.findByIdAndUpdate( page._id, page, { new: true } );
 
     return res.json({
       ok: true,

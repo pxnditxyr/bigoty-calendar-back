@@ -14,12 +14,11 @@ router.use( jwtValidator );
 router.get( '/', getProfile );
 router.put( '/update',
   [
-    check( 'lastName', 'Last name is required' ).not().isEmpty(),
-    check( 'name', 'Name is required' ).not().isEmpty(),
-    check( 'birthday', 'Birthday must be a date' ).custom( isDate ),
-    check( 'username', 'Username is required' ).not().isEmpty(),
+    check( 'lastName', 'Last name must be at least 3 characters and only letters and spaces' ).isLength( { min: 3 } ).matches( /^[a-zA-Z ]+$/ ),
+    check( 'name', 'Name must be at least 2 characters and only letters and spaces' ).isLength( { min: 2 } ).matches( /^[a-zA-Z ]+$/ ),
+    check( 'birthday', 'Birthday is required' ).custom( isDate ),
+    check( 'username', 'Username must be at least 4 characters and only contain lowercase letters and numbers' ).isLength( { min: 4 } ).matches( /^[a-z0-9]+$/ ),
     check( 'email', 'Email is required' ).isEmail(),
-    check( 'password', 'Password is required' ).isLength({ min: 6 }),
     fieldValidators
   ],
   updateProfile
